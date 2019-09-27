@@ -32,6 +32,7 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-netflix-ribbon')  // 2. To use ribbon
     compile('org.springframework.cloud:spring-cloud-starter-netflix-hystrix') // 1. To use spring-cloud-hystrix
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
