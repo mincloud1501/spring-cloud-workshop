@@ -5,6 +5,15 @@ spring:
 server:
   port: 8765
 
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+      base-path: /
+
 zuul:
   routes:
     product:
@@ -27,6 +36,10 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+turbine:
+  cluster-name-expression: new String('default')
+  app-config: display
 
 hystrix:
   command:

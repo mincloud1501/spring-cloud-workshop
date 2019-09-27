@@ -5,6 +5,15 @@ spring:
   application:
     name: display
 
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+      base-path: /
+
 hystrix:
   command:
     productInfo:    # command key. use 'default' for global setting.
