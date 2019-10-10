@@ -1,13 +1,23 @@
 package com.elevenst.api;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+
+    @Autowired
+    RestTemplate restTemplate;
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
 
     @GetMapping(path = "{productId}")
     public String getProductInfo(@PathVariable String productId) {

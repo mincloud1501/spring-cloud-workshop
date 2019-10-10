@@ -1,0 +1,29 @@
+server:
+  port: 8870
+
+spring:
+  application:
+    name: oauth-rs
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka  # default address
+
+#security:
+#  basic:
+#    enabled: false
+#  oauth2:
+#    resource:
+#      jwt:
+#        keyValue: "abc"
+#      id: fooScope
+#      service-id: ${PREFIX:}resource
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

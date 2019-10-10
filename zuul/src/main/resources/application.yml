@@ -2,6 +2,13 @@ spring:
   application:
     name: zuul
 
+logging:
+  level:
+    org.springframework.cloud.netflix.zuul: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.cloud: DEBUG
+    org.springframework.web: WARN
+
 server:
   port: 8765
 
@@ -15,6 +22,7 @@ management:
       base-path: /
 
 zuul:
+  #sensitiveHeaders: Cookie,Set-Cookie
   routes:
     product:
       path: /products/**
@@ -24,10 +32,23 @@ zuul:
       path: /displays/**
       serviceId: display
       stripPrefix: false
+
   ribbon-isolation-strategy: thread
   thread-pool:
     use-separate-thread-pools: true
     thread-pool-key-prefix: zuul-
+
+#security:
+#  oauth2:
+#    client:
+#      accessTokenUri: http://localhost:8769/as/oauth/token
+#      userAuthorizationUri: http://localhost:8769/as/oauth/authorize
+#      clientId: root
+#      clientSecret: root
+#    resource:
+#      jwt:
+#        key-value: 123
+#  sessions: ALWAYS
 
 eureka:
   instance:

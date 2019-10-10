@@ -5,6 +5,16 @@ spring:
   application:
     name: product
 
+  zipkin:
+    baseUrl: http://127.0.0.1:9411/
+    sleuth:
+      enabled: true
+      sampler:
+        probability: 1.0
+    sample:
+      zipkin:
+        enabled: true
+
 eureka:
   instance:
     prefer-ip-address: true

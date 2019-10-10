@@ -32,6 +32,9 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.cloud:spring-cloud-starter-netflix-turbine')
+    //compile('org.springframework.security.oauth:spring-security-oauth2')
+    //compile('org.springframework.security:spring-security-jwt')
+    //compile('org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

@@ -3,4 +3,6 @@ include 'product'
 include 'display'
 include 'eureka-server'
 include 'zuul'
+include 'oauth-as'
+include 'oauth-rs'
 
