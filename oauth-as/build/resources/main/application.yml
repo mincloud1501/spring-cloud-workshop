@@ -1,0 +1,25 @@
+server:
+  port: 8769
+
+spring:
+  application:
+    name: oauth-as
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka  # default address
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: 123
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
