@@ -1,5 +1,6 @@
 package com.elevenst.api;
 
+import brave.sampler.Sampler;
 import com.elevenst.service.FeignProductRemoteService;
 import com.elevenst.service.ProductRemoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,15 @@ import org.springframework.web.client.RestTemplate;
 public class DisplayController {
     @Autowired
     RestTemplate restTemplate;
+
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public Sampler alwaysSampler() {
+        return Sampler.ALWAYS_SAMPLE;
     }
 
     private final ProductRemoteService productRemoteService;
