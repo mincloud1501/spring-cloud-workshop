@@ -1,4 +1,4 @@
-# spring-cloud-workshop https://img.shields.io/badge/Build-Complete-blue
+# spring-cloud-workshop
 MSA Development Project with Spring Boot
 
 # Hystrix Dashboard
