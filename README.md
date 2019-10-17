@@ -1,4 +1,6 @@
 # spring-cloud-workshop
+[![Gitter chat](https://img.shields.io/badge/Chat-Gitter-ff69b4.svg?label=Chat&logo=gitter&style=flat-square)](https://gitter.im/MSA_miniProject/community)&nbsp;
+![](https://img.shields.io/github/repo-size/mincloud1501/spring-cloud-workshop.svg?label=Repo%20size&style=flat-square)&nbsp;
 MSA Development Project with Spring Boot
 
 # Hystrix Dashboard
