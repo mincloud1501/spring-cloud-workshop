@@ -30,6 +30,7 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client') // To use Eureka client
     compile('org.springframework.cloud:spring-cloud-starter-zipkin') // To use Zipkin
     compile('org.springframework.cloud:spring-cloud-starter-sleuth') // To use Sleuth
+    
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

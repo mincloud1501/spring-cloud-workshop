@@ -1,0 +1,59 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: display
+  zipkin:
+    baseUrl: http://127.0.0.1:9411/
+    sleuth:
+      enabled: true
+      sampler:
+        probability: 1.0
+  sample:
+    zipkin:
+      enabled: true
+
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+      base-path: /
+
+hystrix:
+  command:
+    productInfo:    # command key. use 'default' for global setting.
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000
+      circuitBreaker:
+        requestVolumeThreshold: 1   # Minimum number of request to calculate circuit breaker's health. default 20
+        errorThresholdPercentage: 50 # Error percentage to open circuit. default 50
+    FeignProductRemoteService#getProductInfo(String):
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000   # default 1,000ms
+      circuitBreaker:
+        requestVolumeThreshold: 1   # Minimum number of request to calculate circuit breaker's health. default 20
+        errorThresholdPercentage: 50 # Error percentage to open circuit. default 50
+
+product:
+  ribbon:
+    MaxAutoRetries: 0
+    MaxAutoRetriesNextServer: 1
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka  # default address
+
+feign:
+  hystrix:
+    enabled: true

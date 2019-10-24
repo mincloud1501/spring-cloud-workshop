@@ -1,0 +1,101 @@
+spring:
+  application:
+    name: zuul
+
+logging:
+  level:
+    org.springframework.cloud.netflix.zuul: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.cloud: DEBUG
+    org.springframework.web: WARN
+
+server:
+  port: 8765
+
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+      base-path: /
+
+zuul:
+  #sensitiveHeaders: Cookie,Set-Cookie
+  routes:
+    product:
+      path: /products/**
+      serviceId: product
+      stripPrefix: false
+    display:
+      path: /displays/**
+      serviceId: display
+      stripPrefix: false
+
+  ribbon-isolation-strategy: thread
+  thread-pool:
+    use-separate-thread-pools: true
+    thread-pool-key-prefix: zuul-
+
+#security:
+#  oauth2:
+#    client:
+#      accessTokenUri: http://localhost:8769/as/oauth/token
+#      userAuthorizationUri: http://localhost:8769/as/oauth/authorize
+#      clientId: root
+#      clientSecret: root
+#    resource:
+#      jwt:
+#        key-value: 123
+#  sessions: ALWAYS
+
+eureka:
+  instance:
+    non-secure-port: ${server.port}
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+turbine:
+  cluster-name-expression: new String('default')
+  app-config: display
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000
+    product:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+  threadpool:
+    zuul-product:
+      coreSize: 30
+      maximumSize: 100
+      allowMaximumSizeToDivergeFromCoreSize: true
+    zuul-display:
+      coreSize: 30
+      maximumSize: 100
+      allowMaximumSizeToDivergeFromCoreSize: true
+
+product:
+  ribbon:
+    MaxAutoRetriesNextServer: 1
+    ReadTimeout: 3000
+    ConnectTimeout: 1000
+    MaxTotalConnections: 300
+    MaxConnectionsPerHost: 100
+
+display:
+  ribbon:
+    MaxAutoRetriesNextServer: 1
+    ReadTimeout: 3000
+    ConnectTimeout: 1000
+    MaxTotalConnections: 300
+    MaxConnectionsPerHost: 100
