@@ -36,6 +36,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.cloud:spring-cloud-starter-zipkin') // To use Zipkin
     compile('org.springframework.cloud:spring-cloud-starter-sleuth') // To use Sleuth
+    compile('io.springfox:springfox-swagger2:2.9.2')
+	compile('io.springfox:springfox-swagger-ui:2.9.2')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
