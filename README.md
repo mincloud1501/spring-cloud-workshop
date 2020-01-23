@@ -23,6 +23,20 @@ MSA Development Project with Spring Boot using Netflix OSS
 [Zuul Core Architecture]
 ![zuul](images/Zuul_Core_Architecture.png)
 
+### Spring Cloud Zuul
+
+- Zuul-Core의 ZuulServlet을 그대로 사용하여, 아래 그림과 같이 Spring MVC 위에서 동작하기 위해 몇 가지를 추가
+
+[Zuul Core]
+![zuul](images/Zuul_Core.png)
+
+[Spring Cloud Zuul]  [![Sources](https://img.shields.io/badge/출처-Zuul-yellow)](http://cloud.spring.io/spring-cloud-netflix/spring-cloud-netflix.html)
+
+- `RouteLocator`은 url path에 대한 routing을 지정한다. 요청이 들어오면 url path로 어떻게 routing 할 것인가를 정의하고 있다.
+- `ZuulHandlerMapping`은 org.springframework.web.servlet.handler.AbstractUrlHandlerMapping을 상속받고, RouteLocator에 정의된 url path에 zuulController를 매핑한다. RouteLocator에 정의된 path의 요청이 들어오면 zuulController를 호출하게 된다.
+- `ZuulController`은 org.springframework.web.servlet.mvc.ServletWrappingController를 상속받으며, ZuulServlet을 주입시킨다. 그래서 ZuulController로 들어온 모든 요청은 ZuulServlet으로 처리한다.
+- `ZuulFilterInitializer`는 filter Map에 정의된 filter를 FilterRegistry에 등록하고, FilterLoader로 로딩한다.
+
 
 ### Zuul의 build.gradle에 dependency 추가
 ```
@@ -48,6 +62,8 @@ management:
         include: hystrix.stream
       base-path: /
 ```
+
+- Spring Boot Project에 Artifact ID Spring-Cloud-Starter-Zuul를 추가하고 Main Class에 `@EnableZuulProxy`또는 `@EnableZuulServer`를 명시해주면 Zuul 서버가 구축된다.
 
 ### ZuulApplication.java에 Annotation 추가
 ```java
