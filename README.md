@@ -111,6 +111,14 @@ public class ZuulApplication {
 
 - application에서 Distributed Log Trace를 해보자.
 - Spring Boot application을 Zipkin과 연동하기 위해서는 `Sleuth`라는 Library를 사용하면 된다.
+- Java application에서 Trace 정보와 Span 정보를 넘길 때, 여러 class의 method들을 거쳐서 transaction이 완성될때, Trace 정보와 Span 정보 Context가 유지가 되어야 하는데, thread마다 할당되는 thread의 일종의 전역변수인 Thread Local 변수에 이 Trace와 Span Context 정보를 저장하여 유지한다.
+- 분산 트렌젝션은 HTTP나 gRPC로 들어오기 때문에, Spring Sleuth는 HTTP request가 들어오는 시점과 HTTP request가 다른 서비스로 나가는 부분을 wrapping하여 Trace와 Span Context를 전달한다.
+- 아래 그림과 같이 HTTP로 들어오는 요청의 경우에는 Servlet filter를 이용하여, Trace Id와 Span Id를 받고 (만약에 이 서비스가 맨 처음 호출되는 서비스라서 Trace Id와 Span Id가 없을 경우에는 이를 생성한다.)
+- 다른 서비스로 호출을 할 경우, `RestTemplate`을 wrapping하여, Trace Id와 Span Id와 같은 Context 정보를 보낸다.
+
+[Spring Sleuth]
+![Sleuth](images/sleuth.png)
+
 
 ### MicroService의 build.gradle에 Zipkin 및 Sleuth dependency 추가
 
@@ -157,6 +165,7 @@ public class DisplayController {
 - alwaysSampler() 정의를 통해 Tracing Transaction Rate를 결정 가능
 
 ### Zipkin 서버 구동
+
 - jar 파일을 다운 받은 후에, java -jar로 서버를 구동하는게 간편하다.
 ※ 유의사항 : zipkin 서버를 통해서 HTTP로 Trace Log를 받을 때, 별도의 보안이나 인증 메커니즘이 없기 때문에 zipkin 서버는 반드시 방화벽 안에 놓고 서비스 서버로부터만 HTTP 호출을 받을 수 있도록 해야 한다.
 
@@ -166,8 +175,9 @@ public class DisplayController {
 ```
 
 ### Zipkin을 통한 결과 확인
+
 - 서비스 구동
-- http://localhost:9411 Zipkin Server 접속
+- `http://localhost:9411` Zipkin Server 접속
 - Find Traces를 통한 개별 Transaction 확인
 
 [Trace Result]
@@ -178,6 +188,26 @@ public class DisplayController {
 ![Zipkin3](images/zipkin2.png)
 
 ---
+
+# ■ Google Cloud Stack Driver Trace 연동
+
+- 자체 SDK를 이용하여 transaction을 추적하는 것도 가능하며, Zipkin client로 부터 log를 수집할 수 있다.
+- 개발 server는 Zipkin을 사용하고, backend에는 복잡한 Zipkin 서버 대신 Stack driver trace를 사용하는 방법으로 Zipkin 서버 대신 Zipkin/stack driver collector라는 server를 띄우면(addr/port 변경), 이 server가 Stackdriver로 log를 저장하고 시각화 해준다.
+- Google Cloud뿐만 아니라, local 환경, AWS, Azure, On Prem 등 다양한 환경에 설치가 가능하여 모든 애플리케이션 서비스를 통합해서 Stack driver로 trace가 가능하다.
+
+### Install Zipkin/stack driver collector [![Sources](https://img.shields.io/badge/출처-ZipkinStackDriver-yellow)](https://cloud.google.com/trace/docs/zipkin)
+
+- Docker Image 또는 java jar 파일을 download하여 사용한다.
+- Google Cloud VM이나 Docker로 실행할 때는 상관 없지만, google cloud 밖에서 Zipkin Stackdriver collector를 실행할 때는 추가 인증 정보를 설정해야 한다.
+- Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다.
+
+```
+// https://mvnrepository.com/artifact/com.google.cloud.trace.adapters.zipkin/collector
+compile('com.google.cloud.trace.adapters.zipkin:collector:0.6.0') // To use StackDriver
+```
+
+---
+
 # ■ Swagger 연동
 Usage of Swagger 2.0 in Spring Boot Applications to document APIs
 
