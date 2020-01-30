@@ -39,12 +39,14 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 
 ### Zuul의 build.gradle에 dependency 추가
+
 ```
 compile('org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard')
 compile('org.springframework.boot:spring-boot-starter-actuator')
 ```
 
 ### Zuul의 application.yml에 management 추가
+
 ```yaml
 spring:
   application:
@@ -66,6 +68,7 @@ management:
 - Spring Boot Project에 Artifact ID Spring-Cloud-Starter-Zuul를 추가하고 Main Class에 `@EnableZuulProxy`또는 `@EnableZuulServer`를 명시해주면 Zuul 서버가 구축된다.
 
 ### ZuulApplication.java에 Annotation 추가
+
 ```java
 @EnableZuulProxy
 @EnableDiscoveryClient
@@ -82,24 +85,42 @@ public class ZuulApplication {
 ```
 
 ### Hystrix Dashboard Connction
+
 [Hystrix Dashboard]
 ![dashboard1](images/dashboard1.png)
 
 [Hystrix Stream]
 ![dashboard2](images/dashboard2.png)
 
+---
+
+## Zipkin
+
+- Zipkin으로 추적할 수 있는 분산 트렌젝션은 HTTP를 기본으로 지원하고 , 이외에도 많이 사용되는 리모트 프로토콜인 gRPC를 함께 지원한다.
+- Zipkin 클라이언트 SDK는 [![Sources](https://img.shields.io/badge/출처-Zipkin-yellow)](https://zipkin.io/pages/existing_instrumentations)에 있는데, Zipkin에서 공식적으로 지원하는 라이브러는 아래와 같이 C#, Go, Java, Javascript,Ruby,Scala 등이 있다.
+- Zipkin 라이브러리는 수집된 트렌젝션 정보를 zipkin 서버의 collector 모듈로 전송한다. 이 때 다양한 프로토콜을 사용할 수 있는데, 일반적으로 HTTP를 사용하고, 시스템의 규모가 클 경우에는 Kafka Queue를 넣어서 Kafka Protocol로 전송이 가능하다.
+- Zipkin Client SDK에 의해서 전송된 정보는 Storage(In-Memory, MySQL, Cassandra, Elastic Serch)에 저장할 수 있다.
+- 이렇게 수집된 정보는 Dashboard를 이용하여 시각화가 가능하다. Zipkin Server의 dashboard를 사용할 수 있고, Elastic Search 백앤드를 이용한 경우에는 Kibana를 이용하여 시각화가 가능하다.
+
+
+[Zipkin Architecture]
+![Zipkin](images/zipkin_architecture.png)
+
 
 # ■ Spring Sleuth를 이용한 Zipkin 연동
+
 - application에서 Distributed Log Trace를 해보자.
-Spring Boot application을 Zipkin과 연동하기 위해서는 Sleuth라는 Library를 사용하면 된다.
+- Spring Boot application을 Zipkin과 연동하기 위해서는 `Sleuth`라는 Library를 사용하면 된다.
 
 ### MicroService의 build.gradle에 Zipkin 및 Sleuth dependency 추가
+
 ```
 compile('org.springframework.cloud:spring-cloud-starter-zipkin')
 compile('org.springframework.cloud:spring-cloud-starter-sleuth')
 ```
 
 ### MicroService의 application.yml에 zipkin 및 sample 추가
+
 ```yaml
 spring:
   application:
@@ -118,6 +139,7 @@ spring:
 ```
 
 ### MicroService의 Controller에 Annotation 추가
+
 ```java
 public class DisplayController {
     @Autowired
@@ -131,6 +153,7 @@ public class DisplayController {
         return Sampler.ALWAYS_SAMPLE;
     }
 ```
+
 - alwaysSampler() 정의를 통해 Tracing Transaction Rate를 결정 가능
 
 ### Zipkin 서버 구동
@@ -161,12 +184,14 @@ Usage of Swagger 2.0 in Spring Boot Applications to document APIs
 - Source Code내에서 annotation을 통해 직접 API를 문서화할 수 있다.
 
 ### MicroService의 build.gradle에 Swagger dependency 추가
+
 ```
 compile('io.springfox:springfox-swagger2:2.9.2')
 compile('io.springfox:springfox-swagger-ui:2.9.2')
 ```
 
 ### MicroService의 Application에 Annotation 및 @Bean 추가
+
 ```java
 @EnableSwagger2
 ...
@@ -192,6 +217,7 @@ private ApiInfo apiInfo() {
 ```
 
 ### MicroService의 Controller에 @ApiResponses 추가
+
 ```java
 @ApiResponses(value = { 
   @ApiResponse(code = 200, message = "Success", response = DisplayApplication.class),
@@ -200,6 +226,7 @@ private ApiInfo apiInfo() {
   @ApiResponse(code = 404, message = "Not Found"),
   @ApiResponse(code = 500, message = "Failure")}) 
 ```
+
 ### Swagegr Run
 
 - http://localhost:8081/swagger-ui.html#/
