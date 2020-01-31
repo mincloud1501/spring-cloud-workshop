@@ -206,7 +206,7 @@ compile('com.google.cloud.trace.adapters.zipkin:collector:0.6.0') // To use Stac
 
 - Docker Image 또는 java jar 파일을 download하여 사용한다.
 - Google Cloud VM이나 Docker로 실행할 때는 상관 없지만, google cloud 밖에서 Zipkin Stackdriver collector를 실행할 때는 추가 인증 정보를 설정해야 한다.
-- Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다. [![Sources](https://medium.com/google-cloud/distributed-tracing-spring-boot-microservices-with-stackdriver-trace-7fe42c6de3f3)
+- Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다. [![Sources](https://img.shields.io/badge/출처-GoogleStackDriver-yellow)](https://medium.com/google-cloud/distributed-tracing-spring-boot-microservices-with-stackdriver-trace-7fe42c6de3f3)
 - Service Account 파일이 생성되면, 아래와 같이 `GOOGLE_APPLICATION_CREDENTAILS` 환경 변수에 Service account 파일의 경로를 지정하고 google cloud의 어느 project에 있는 Stack Driver와 연결할지를 `PROJECT_ID` 환경 변수에 Project명을 지정해주면 된다.
 
 ```
@@ -220,6 +220,7 @@ export PROJECT_ID="zipkin-proxy"
 [Result]
 ![Stackdriver](images/stackdriver_trace_result1.png)
 ![Stackdriver](images/stackdriver_trace_result2.png)
+![Stackdriver](images/stackdriver_trace_result3.png)
 
 ---
 
