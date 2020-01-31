@@ -195,16 +195,31 @@ public class DisplayController {
 - 개발 server는 Zipkin을 사용하고, backend에는 복잡한 Zipkin 서버 대신 Stack driver trace를 사용하는 방법으로 Zipkin 서버 대신 Zipkin/stack driver collector라는 server를 띄우면(addr/port 변경), 이 server가 Stackdriver로 log를 저장하고 시각화 해준다.
 - Google Cloud뿐만 아니라, local 환경, AWS, Azure, On Prem 등 다양한 환경에 설치가 가능하여 모든 애플리케이션 서비스를 통합해서 Stack driver로 trace가 가능하다.
 
-### Install Zipkin/stack driver collector [![Sources](https://img.shields.io/badge/출처-ZipkinStackDriver-yellow)](https://cloud.google.com/trace/docs/zipkin)
-
-- Docker Image 또는 java jar 파일을 download하여 사용한다.
-- Google Cloud VM이나 Docker로 실행할 때는 상관 없지만, google cloud 밖에서 Zipkin Stackdriver collector를 실행할 때는 추가 인증 정보를 설정해야 한다.
-- Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다.
+- Service별 build.grale에 dependency 정의
 
 ```
 // https://mvnrepository.com/artifact/com.google.cloud.trace.adapters.zipkin/collector
 compile('com.google.cloud.trace.adapters.zipkin:collector:0.6.0') // To use StackDriver
 ```
+
+### Install Zipkin/stack driver collector [![Sources](https://img.shields.io/badge/출처-ZipkinStackDriver-yellow)](https://cloud.google.com/trace/docs/zipkin)
+
+- Docker Image 또는 java jar 파일을 download하여 사용한다.
+- Google Cloud VM이나 Docker로 실행할 때는 상관 없지만, google cloud 밖에서 Zipkin Stackdriver collector를 실행할 때는 추가 인증 정보를 설정해야 한다.
+- Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다. [![Sources](https://medium.com/google-cloud/distributed-tracing-spring-boot-microservices-with-stackdriver-trace-7fe42c6de3f3)
+- Service Account 파일이 생성되면, 아래와 같이 `GOOGLE_APPLICATION_CREDENTAILS` 환경 변수에 Service account 파일의 경로를 지정하고 google cloud의 어느 project에 있는 Stack Driver와 연결할지를 `PROJECT_ID` 환경 변수에 Project명을 지정해주면 된다.
+
+```
+export GOOGLE_APPLICATION_CREDENTIALS="c:/zipkin-proxy-dc1792cd9893.json"
+export PROJECT_ID="zipkin-proxy"
+```
+
+- 환경변수 설정이 끝나면 `java -jar collector-0.6.0.jar` 명령으로 collector를 실행한다. (port: 9411)
+- GCP내 Stackdriver > Trace > Trace List을 통해 세부정보 확인
+
+[Result]
+![Stackdriver](images/stackdriver_trace_result1.png)
+![Stackdriver](images/stackdriver_trace_result2.png)
 
 ---
 
