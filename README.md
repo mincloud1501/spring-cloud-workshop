@@ -5,6 +5,37 @@
 
 MSA Development Project with Spring Boot using Netflix OSS
 
+# ■ Service Mesh의 종류
+
+- Service Mesh는 현재 크게 세가지 유형으로 구분할 수 있다.
+
+1) PaaS(Platform as a Service)의 일부로 서비스 코드에 포함되는 유형 `Mesh-Native Code`
+: Microsoft Azure Service `fabric`, lagom, SENECA 등이 이 유형에 해당되며, 프레임워크 기반의 프로그래밍 모델이기 때문에, 서비스메쉬를 구현하는데에 특화된 코드가 필요하다. 
+
+2) 라이브러리로 구현되어 API 호출을 통해 Service Mesh에 결합되는 유형 `Mesh Aware Code`
+: Spring Cloud, `Netflix OSS`(Ribbon/Hystrix/Eureka/Archaius), finagle 등이 이 유형에 해당되며, framework library를 사용하는 형태. 이중 Netfilix의 Prana는 sidecar 형태로 동작하며 서비스 메시를 이해하고 코드를 작성해야 한다.
+
+3) Side Car Proxy를 이용하여 Service Mesh를 Microservice에 주입하는 유형  `Side Car Proxy`
+: `Istio/Envoy`, Consul, Linkerd 등이 이 유형에 해당되며, Sidecar Proxy 형태로 동작하므로 Service Mesh와 무관하게 Code를 작성할 수 있다.
+: 최근의 Service Mesh는 Sidecar Pattern이 recommended 되고 있는 추세
+
+[Service Mesh Tech.]
+
+![mesh](images/service_mesh.png)
+
+
+### Sidecar Pattern
+
+- 모든 응용 program container에 추가로 sidecar container가 배포된다. Sidecar는 서비스에 들어오거나 나가는 모든 네트워크 트래픽을 처리하게 된다.
+- business logic이 포함된 실제 service와 sidecar가 병렬로 구성되어, 서비스 호출에서 서비스가 직접 서비스를 호출하는 것이 아니라 proxy를 통해서 호출하게 된다.
+- 대규모 MSA 환경이라고 하여도 개발자가 별도의 작업 없이 서비스의 연결 뿐만 아니라, 로깅, 모니터링, 보안, 트래픽 제어와 같은 다양한 이점을 누릴 수 있다.
+
+[Sidecar Pattern]
+
+![Sidecar](images/sidecar.png)
+
+---
+
 # ■ Hystrix Dashboard
 - Hystrix Dashboard는 앞의 Hystrix 설정에 따른 Circuit breaker의 상태를 모니터링 할 수 있는 dashboard를 제공해주는 라이브러리이다. 사실 라이브러리라기 보다는 솔루션에 가깝다고 할 정도로 간단한 설정으로 실행할 수 있다.
 - Client 요청은 많은 traffic과 다양한 형태(예상하지 못한 형태)의 요청으로 경고없이 운영 이슈 발생 상황에 신속히 대응할 수 있는 시스템 zuul을 개발
@@ -21,6 +52,7 @@ MSA Development Project with Spring Boot using Netflix OSS
 - Static Response handling : 클러스터에서 오는 응답을 대신하여 API GATEWAY에서 응답 처리
 
 [Zuul Core Architecture]
+
 ![zuul](images/Zuul_Core_Architecture.png)
 
 ### Spring Cloud Zuul
@@ -28,6 +60,7 @@ MSA Development Project with Spring Boot using Netflix OSS
 - Zuul-Core의 ZuulServlet을 그대로 사용하여, 아래 그림과 같이 Spring MVC 위에서 동작하기 위해 몇 가지를 추가
 
 [Zuul Core]
+
 ![zuul](images/Zuul_Core.png)
 
 [Spring Cloud Zuul]  [![Sources](https://img.shields.io/badge/출처-Zuul-yellow)](http://cloud.spring.io/spring-cloud-netflix/spring-cloud-netflix.html)
@@ -87,9 +120,11 @@ public class ZuulApplication {
 ### Hystrix Dashboard Connction
 
 [Hystrix Dashboard]
+
 ![dashboard1](images/dashboard1.png)
 
 [Hystrix Stream]
+
 ![dashboard2](images/dashboard2.png)
 
 ---
@@ -104,6 +139,7 @@ public class ZuulApplication {
 
 
 [Zipkin Architecture]
+
 ![Zipkin](images/zipkin_architecture.png)
 
 
@@ -181,6 +217,7 @@ public class DisplayController {
 - Find Traces를 통한 개별 Transaction 확인
 
 [Trace Result]
+
 ![Zipkin1](images/zipkin.png)
 
 ![Zipkin2](images/zipkin1.png)
@@ -218,6 +255,7 @@ export PROJECT_ID="zipkin-proxy"
 - GCP내 Stackdriver > Trace > Trace List을 통해 세부정보 확인
 
 [Result]
+
 ![Stackdriver](images/stackdriver_trace_result1.png)
 ![Stackdriver](images/stackdriver_trace_result2.png)
 ![Stackdriver](images/stackdriver_trace_result3.png)
