@@ -5,6 +5,8 @@
 
 MSA Development Project with Spring Boot using Netflix OSS
 
+![agile_coding](images/agile_coding.png)
+
 # ■ Service Mesh의 종류
 
 - Service Mesh는 현재 크게 세가지 유형으로 구분할 수 있다.
