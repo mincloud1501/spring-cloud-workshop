@@ -40,6 +40,7 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 - `Identity Provider` : 토큰 기반 서비스를 사용하여 인증 및 권한 부여를 외부화하는 것은 안전한 고객 대 서비스 및 서비스 대 서비스 상호 작용을 보장하는 것이 좋다.
 
+
 [MSA Components]
 
 ![Components](images/msa_architecture.png)
@@ -76,6 +77,10 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 # ■ Service Mesh의 종류
 
+[Service Mesh Tech.]
+
+![mesh](images/service_mesh.png)
+
 - Service Mesh는 현재 크게 세가지 유형으로 구분할 수 있다.
 
 1) PaaS(Platform as a Service)의 일부로 서비스 코드에 포함되는 유형 `Mesh-Native Code`
@@ -88,9 +93,9 @@ MSA Development Project with Spring Boot using Netflix OSS
 : `Istio/Envoy`, Consul, Linkerd 등이 이 유형에 해당되며, Sidecar Proxy 형태로 동작하므로 Service Mesh와 무관하게 Code를 작성할 수 있다.
 : 최근의 Service Mesh는 Sidecar Pattern이 recommended 되고 있는 추세
 
-[Service Mesh Tech.]
+--> Netflix 계열 OSS를 사용하기 위해선 동작을 위한 Application Library를 사용해야만 했는데, Kubernetes와 Service Mesh를 이용한 Microservice 관리(Istio/Envoy)시 소스코드 관리나 기존 정책을 바꿀 필요가 없다.
 
-![mesh](images/service_mesh.png)
+![mesh](images/netflix_vs_istio.png)
 
 
 ### Sidecar Pattern
@@ -105,7 +110,12 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 ---
 
-# ■ Hystrix Dashboard
+# ■ Netflix OSS (Hystrix/Ribbon//Eureka/Archaius)
+
+Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh Aware Code` 유형에 대한 실습을 진행해 본다.
+
+
+## ■ Hystrix Dashboard
 - Hystrix Dashboard는 앞의 Hystrix 설정에 따른 Circuit breaker의 상태를 모니터링 할 수 있는 dashboard를 제공해주는 라이브러리이다. 사실 라이브러리라기 보다는 솔루션에 가깝다고 할 정도로 간단한 설정으로 실행할 수 있다.
 - Client 요청은 많은 traffic과 다양한 형태(예상하지 못한 형태)의 요청으로 경고없이 운영 이슈 발생 상황에 신속히 대응할 수 있는 시스템 zuul을 개발
 - zuul은 이런한 문제를 신속하고, 동적으로 해결하기 위해서 groovy 언어로 작성된 다양한 형태의 Filter를 실행한다.
@@ -422,52 +432,52 @@ private ApiInfo apiInfo() {
 ![migration_step](images/migration_step.png)
 
 
-1. Monolith 판단시 고려사항
+1. `Monolith 판단시 고려사항`
   - Monolithic code와 DB는 변화하기 매우 어렵다.
   - MSA로의 변경은 팀간의 높은 수준의 협업과 커뮤니케이션이 필요하다.
   - 우리는 반복적인 분석을 통해 수 없이 많은 테스트를 실시해야 한다. 비즈니스는 안정성이 필수이기 때문이다.
   - 완벽한 자동화를 이용하여 새로운 프로세스를 배포해야 한다. 
 
-2. UI 추출시 고려사항
+2. `UI 추출시 고려사항`
   - 이 단계에서 Monolithic Application을 수정하면 안된다. 단순히 Monolith에 포함되어있는 UI를 `Copy-Paste로 복사를 하여 분리`시켜야 한다.
   - 작업을 수행하기 전, UI와 Monolith 사이에 적절한 `API Interface 설계`가 되어 있어야 한다.
   - Ingress 구간이 두 채널이 되기 때문에, `보안에 대한 고려`도 필요하다.
   - UI와 Monolith 두 구간으로의 트래픽 분산을 위한 `Platform 설계`가 돼있어야 한다. 또한 Canary, Blue-green, Rolling Deployment 정책을 수행하기 위한 프로세스도 존재해야 한다. 
 
-3. UI를 Monolith에서 분리시 고려사항
+3. `UI를 Monolith에서 분리시 고려사항`
   - UI 모듈을 Monolith에서 완전히 제거하는 작업이다.
   - 이 작업을 수행하려면 Monolith에 대한 최소한의 변경이 필요하다.
   - Routing/Shaping 방식을 사용하여 다운타임 없이 변화를 수행해야 한다.
 
-4. 신규 서비스 도입시 고려사항
+4. `신규 서비스 도입시 고려사항`
   - 신규 서비스는 기존 Backend와의 API 디자인 및 Boundary에 대한 우선적인 설계가 될 것이다.
   - 이 서비스는 Backend에서 분리된 것이 아니라, 새롭게 작성된 기능이다.
   - API 설계를 결정한 후에는, 간단한 Scaffolding 혹은 Place holder를 구현할 것이다.
   - 신규 서비스는 자체 데이터 베이스를 가지고 있다.
   - 아직 이 단계에서는 서비스에 트래픽이 접근하지 않는다.
 
-5. 신규 서비스와 API 통합시 고려사항
+5. `신규 서비스와 API 통합시 고려사항`
   - 신규 서비스는 Monolith의 데이터 모델과 긴밀하게 결합된 모델을 가지고 있다.
   - 실 상황에서 Monolith는 데이터를 얻기 위한 API가 설계되어 있지 않을 가능성이 크다.
   - Read-only query를 위해 임시적으로 Backend DB에 direct로 접근할 수 있다.
   - Monolith의 DB가 수정되는 일은 거의 없다.
 
-6. 신규 서비스의 Dark Launch시 고려사항
+6. `신규 서비스의 Dark Launch시 고려사항`
   - Code path에 신규 서비스를 적용하면 많은 이슈가 발생할 수 있다.
   - 신규 서비스의 영향도를 체크하고 모니터링 해야한다.
   - 트래픽 제어를 위한 `gateway platform`에 대한 구성이 필요하다.
   - 이 게이트웨이 플랫폼을 이용하여 특정 사람 혹은 집단의 트래픽을 새로운 Backend 서비스로 연결해야 한다.
 
-7. 신규 서비스로 Canary/Rolling 배포시 고려사항
+7. `신규 서비스로 Canary/Rolling 배포시 고려사항`
   - 바로 이 ‘cohort group’을 식별하고 새로운 Microservice에 실시간 트랜잭션 트래픽을 보낼 수 있어야 한다.
   - 트랜잭션이 여전히 두 코드 경로로 진행되는 일정한 기간이 있기 때문에, 여전히 Monolith에 직접 데이터베이스 연결이 필요하다.
   - 모든 트래픽을 새로운 버전인 Microservice로 이동 한 후에 그 전 기능을 제거해야 한다.
   - 라이브 서비스를 새로운 v2 서비스로 보내면 이전 버전으로 Rollback할 때 이슈가 발생할 수 있다. v1과 v2를 Load-balancing 방식으로 계속 트래픽을 공유하면 안된다.
 
-8. Offline Data ETL/Migration시 고려사항
+8. `Offline Data ETL/Migration시 고려사항`
   - Monolith의 데이터와 Microservice 데이터가 공유 가능한 데이터인지 확인해야 하며, 공유 및 변경이 가능하다면 데이터 소유에 대한 이슈를 해결해야 한다.
 
-9. Datastore와 연결 해제 및 Decouple시 고려사항
+9. `Datastore와 연결 해제 및 Decouple시 고려사항`
   - 신규 서비스의 API Interface를 backend direct로 연결된 것이 아닌 gateway 모듈로 연결하여 완전한 De-coupling 구조로 만든다.
 
 ---
