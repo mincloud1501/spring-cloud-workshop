@@ -390,6 +390,58 @@ private ApiInfo apiInfo() {
 
 ---
 
+# ■ Monolithic Acrchitecture에서 MSA로의 Migration 방법론
+
+- MSA는 모든 Application에 적용할 수 있는 것은 아니다.
+- MSA로 이동해야 한다면, 기존 Monolith에서 감수해 내야만 하는 것들을 결정해야 한다.
+- 매우 드문 경우에만 Monolith의 모듈 그대로를 분리하여 MSA화 할 수 있다. 그 외의 경우에는 기존 프로세스를 유지하지 못한다.(코드 레벨까지 수정 혹은 재개발이 필요하다.)
+- MSA가 비즈니스 확장성 및 생산성에 큰 이점이 있는 것은 사실이지만, 어떤 경우에는 Monolith를 그대로 유지하여 개발하고, 운영하는 것이 더 큰 business value를 가져다 주기도 한다.
+- Monolith는 단일 객체 그 자체이기 때문에, 해당 architecture에 속해 있는 데이터 모델 및 데이터베이스를 변경하는 것은 매우 어렵거나 거의 불가능에 가깝다. 이를 위해서는 데이터에 대한 Refactoring이 필요하다.
+
+### Microservice Decomposition
+
+- 코드의 API화나 Integration 등에 대한 이야기 보다는 종속된 데이터 관계를 어떻게 분리시킬 것인지, 분리된 데이터 관계로 인한 모듈화가 중요하다.
+  - `Module에 대한 식별` : 기존 모듈을 유지하거나, 새로운 모듈 작성, 어떤 기능(모듈)을 분리하고 싶은지, 해당 서비스가 어떤 테이블에 연관되어 있는지에 대해 판단한 다음 그 곳에서 부터 변화를 시작해야 한다.
+  - `DB 재정의` : 각각 모듈에 해당하는 Database table 분리, 서비스로 포장, dependencies 업데이트. 각 모듈의 독립성을 유지하기 위해서는 반드시 데이터가 분리되어야 한다.
+  - `Code Update` : 새로운 서비스를 호출하기 위해 DB 테이블에 직접 호출했던 코드 업데이트
+  - 더 이상 모듈화 단계를 반복할 수 없을 때까지 이 방법을 지속적으로 강화 및 반복한다. but,
+    - 현존하는 많은 수의 monolith가 위와 같은 방법으로 깔끔한 모듈화가 어렵다.
+    - 테이블 간의 정규화, 엔티티 결합, 무결정 제약 조건 등을 유지하기 까다롭다.
+    - Monolith에 복잡한 Query 코드를 작성했을 때, 어떤 테이블을 어떻게 사용했는지 이해하기 힘들 수 있다.
+    - 단순하게 모듈을 쪼개는 방식이 아닌 매우 까다롭고 비용이 많이 드는 migration이 있을 수 있다.
+    - 모듈화를 진행하다 보면, 오히려 쪼개지 않는 쪽에 이점이 많은 지점이 생길 수 있다.
+
+
+[Migration]
+
+![migration](images/migration.png)
+
+
+### Microservice Migration Steps
+
+![migration_step](images/migration_step.png)
+
+
+1. Monolith 판단시 고려사항
+  - Monolithic code와 DB는 변화하기 매우 어렵다.
+  - MSA로의 변경은 팀간의 높은 수준의 협업과 커뮤니케이션이 필요하다.
+  - 우리는 반복적인 분석을 통해 수 없이 많은 테스트를 실시해야 한다. 비즈니스는 안정성이 필수이기 때문이다.
+  - 완벽한 자동화를 이용하여 새로운 프로세스를 배포해야 한다. 
+
+2. UI 추출시 고려사항
+  - 이 단계에서 Monolithic Application을 수정하면 안된다. 단순히 Monolith에 포함되어있는 UI를 `Copy-Paste로 복사를 하여 분리`시켜야 한다.
+  - 작업을 수행하기 전, UI와 Monolith 사이에 적절한 `API Interface 설계`가 되어 있어야 한다.
+  - Ingress 구간이 두 채널이 되기 때문에, `보안에 대한 고려`도 필요하다.
+  - UI와 Monolith 두 구간으로의 트래픽 분산을 위한 `Platform 설계`가 돼있어야 한다. 또한 Canary, Blue-green, Rolling Deployment 정책을 수행하기 위한 프로세스도 존재해야 한다. 
+
+3. UI를 Monolith에서 분리시 고려사항
+  - UI 모듈을 Monolith에서 완전히 제거하는 작업이다.
+  - 이 작업을 수행하려면 Monolith에 대한 최소한의 변경이 필요하다.
+  - Routing/Shaping 방식을 사용하여 다운타임 없이 변화를 수행해야 한다.
+
+
+---
+
 ### Project Management using Trello
 
 [Trello]
