@@ -439,6 +439,36 @@ private ApiInfo apiInfo() {
   - 이 작업을 수행하려면 Monolith에 대한 최소한의 변경이 필요하다.
   - Routing/Shaping 방식을 사용하여 다운타임 없이 변화를 수행해야 한다.
 
+4. 신규 서비스 도입시 고려사항
+  - 신규 서비스는 기존 Backend와의 API 디자인 및 Boundary에 대한 우선적인 설계가 될 것이다.
+  - 이 서비스는 Backend에서 분리된 것이 아니라, 새롭게 작성된 기능이다.
+  - API 설계를 결정한 후에는, 간단한 Scaffolding 혹은 Place holder를 구현할 것이다.
+  - 신규 서비스는 자체 데이터 베이스를 가지고 있다.
+  - 아직 이 단계에서는 서비스에 트래픽이 접근하지 않는다.
+
+5. 신규 서비스와 API 통합시 고려사항
+  - 신규 서비스는 Monolith의 데이터 모델과 긴밀하게 결합된 모델을 가지고 있다.
+  - 실 상황에서 Monolith는 데이터를 얻기 위한 API가 설계되어 있지 않을 가능성이 크다.
+  - Read-only query를 위해 임시적으로 Backend DB에 direct로 접근할 수 있다.
+  - Monolith의 DB가 수정되는 일은 거의 없다.
+
+6. 신규 서비스의 Dark Launch시 고려사항
+  - Code path에 신규 서비스를 적용하면 많은 이슈가 발생할 수 있다.
+  - 신규 서비스의 영향도를 체크하고 모니터링 해야한다.
+  - 트래픽 제어를 위한 `gateway platform`에 대한 구성이 필요하다.
+  - 이 게이트웨이 플랫폼을 이용하여 특정 사람 혹은 집단의 트래픽을 새로운 Backend 서비스로 연결해야 한다.
+
+7. 신규 서비스로 Canary/Rolling 배포시 고려사항
+  - 바로 이 ‘cohort group’을 식별하고 새로운 Microservice에 실시간 트랜잭션 트래픽을 보낼 수 있어야 한다.
+  - 트랜잭션이 여전히 두 코드 경로로 진행되는 일정한 기간이 있기 때문에, 여전히 Monolith에 직접 데이터베이스 연결이 필요하다.
+  - 모든 트래픽을 새로운 버전인 Microservice로 이동 한 후에 그 전 기능을 제거해야 한다.
+  - 라이브 서비스를 새로운 v2 서비스로 보내면 이전 버전으로 Rollback할 때 이슈가 발생할 수 있다. v1과 v2를 Load-balancing 방식으로 계속 트래픽을 공유하면 안된다.
+
+8. Offline Data ETL/Migration시 고려사항
+  - Monolith의 데이터와 Microservice 데이터가 공유 가능한 데이터인지 확인해야 하며, 공유 및 변경이 가능하다면 데이터 소유에 대한 이슈를 해결해야 한다.
+
+9. Datastore와 연결 해제 및 Decouple시 고려사항
+  - 신규 서비스의 API Interface를 backend direct로 연결된 것이 아닌 gateway 모듈로 연결하여 완전한 De-coupling 구조로 만든다.
 
 ---
 
