@@ -6,6 +6,9 @@
 MSA Development Project with Spring Boot using Netflix OSS
 
 ![agile_coding](images/agile_coding.png)
+![mono_vs_msa](images/mono_msa.png)
+![soa_vs_msa](images/soa_msa1.png)
+![msa_sample](images/msa_sample.png)
 
 
 # ■ MSA Components
@@ -40,6 +43,34 @@ MSA Development Project with Spring Boot using Netflix OSS
 [MSA Components]
 
 ![Components](images/msa_architecture.png)
+
+---
+
+# ■ MSA Layers [![Sources](https://img.shields.io/badge/출처-Redhat-yellow)](https://developers.redhat.com/blog/author/weimeilin/)
+
+- Microservice Architecture에 대해 4개의 독립된 Layer를 정의하여 각 Layer가 개별적으로 쉽게 변할 수 있다.
+- `Gateway Layer` : 버전 관리와 같은 간단한 게이트웨이 라우팅 기능을 제공하여 다른 플랫폼의 장치를 처리한다.
+  - APIs
+    - Traffic throttle 처리에 필요한 모든 정책
+    - API 보안
+    - 올바른 버전으로의 라우팅
+  - Combine
+    - 데이터 정규화에 대한 유지
+    - 클라이언트 형태에 따른 output type의 변형
+    - Application Domain간의 연결
+
+- `Composite layer` : 다수의 Microservice 구성을 처리하는 중요한 중간 Layer이다. 이 계층에서 데이터 처리에 대한 복잡한 라우팅을 수행하고 데이터를 split/aggregate하며 이벤트를 트리거하거나 단순히 전달함으로써 분할/집계된 결과를 다른 마이크로 서비스에 적용한다. 이 계층은 Client로 부터 Microservice의 복잡성을 숨긴다.
+  - MSA 구현 : Microservice에서 사용할 수있는 API를 호출하고 필요에 따라 데이터를 변환하며 해당 내용을 기반으로 담당 Microservice로 데이터를 라우팅한다.
+  - Event Trigger : 각 서비스간 느슨한 연결을 통해 Event를 유지해야 한다. 비동기 특성으로 인해 최상의 성능을 보장하는 형태를 구현한다. 여기서 이벤트 버스는 Message Broker일 필요는 없지만 모든 형태의 버스가 될 수 있다.
+  - Caching : REST Architecture는 Caching이 필요하다. 복합 Layer는 비즈니스 연관성이 떨어지므로 캐싱 메커니즘을 적용하여 Stateless를 유지해야 한다.
+
+- `Basic Layer` :  시스템의 기본 구성 요소를 포함한다. 데이터 검색 또는 비즈니스 로직 처리를 처리한다. 각각은 모듈은 모두 독립적이어야 한다.
+  - Anti-corruption layer : 이 계층은 Legacy Application 또는 Microservice가 규칙에 따라 작동하는 인터페이스를 처리한다.
+
+
+[MSA Layers]
+
+![Layers](images/msa_layer.png)
 
 ---
 
