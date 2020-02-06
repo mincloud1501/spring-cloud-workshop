@@ -110,7 +110,7 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 ---
 
-# ■ Netflix OSS (Hystrix/Ribbon//Eureka/Archaius)
+# ■ Netflix OSS (Hystrix/Ribbon/Eureka/Archaius)
 
 Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh Aware Code` 유형에 대한 실습을 진행해 본다.
 
@@ -159,7 +159,7 @@ compile('org.springframework.boot:spring-boot-starter-actuator')
 
 ### Zuul의 application.yml에 management 추가
 
-```yaml
+```yml
 spring:
   application:
     name: zuul
@@ -284,7 +284,7 @@ public class DisplayController {
 - jar 파일을 다운 받은 후에, java -jar로 서버를 구동하는게 간편하다.
 ※ 유의사항 : zipkin 서버를 통해서 HTTP로 Trace Log를 받을 때, 별도의 보안이나 인증 메커니즘이 없기 때문에 zipkin 서버는 반드시 방화벽 안에 놓고 서비스 서버로부터만 HTTP 호출을 받을 수 있도록 해야 한다.
 
-```
+```bash
 > wget -O zipkin.jar   <-- Download
 > java -jar zipkin.jar <-- Server 구동
 ```
@@ -311,9 +311,9 @@ public class DisplayController {
 - 개발 server는 Zipkin을 사용하고, backend에는 복잡한 Zipkin 서버 대신 Stack driver trace를 사용하는 방법으로 Zipkin 서버 대신 Zipkin/stack driver collector라는 server를 띄우면(addr/port 변경), 이 server가 Stackdriver로 log를 저장하고 시각화 해준다.
 - Google Cloud뿐만 아니라, local 환경, AWS, Azure, On Prem 등 다양한 환경에 설치가 가능하여 모든 애플리케이션 서비스를 통합해서 Stack driver로 trace가 가능하다.
 
-- Service별 build.grale에 dependency 정의
+- Service별 build.gradle에 dependency 정의
 
-```
+```java
 // https://mvnrepository.com/artifact/com.google.cloud.trace.adapters.zipkin/collector
 compile('com.google.cloud.trace.adapters.zipkin:collector:0.6.0') // To use StackDriver
 ```
@@ -325,7 +325,7 @@ compile('com.google.cloud.trace.adapters.zipkin:collector:0.6.0') // To use Stac
 - Stack driver collector가 Stackdriver server(google cloud)로 log를 전달하기 위해서는 아무 log나 받으면 안되고 추가 인증된 log만 받아야 하는데 google cloud에서는 application 인증을 위해서 Service Account라는 JSON 파일을 사용한다. [![Sources](https://img.shields.io/badge/출처-GoogleStackDriver-yellow)](https://medium.com/google-cloud/distributed-tracing-spring-boot-microservices-with-stackdriver-trace-7fe42c6de3f3)
 - Service Account 파일이 생성되면, 아래와 같이 `GOOGLE_APPLICATION_CREDENTAILS` 환경 변수에 Service account 파일의 경로를 지정하고 google cloud의 어느 project에 있는 Stack Driver와 연결할지를 `PROJECT_ID` 환경 변수에 Project명을 지정해주면 된다.
 
-```
+```bash
 export GOOGLE_APPLICATION_CREDENTIALS="c:/zipkin-proxy-dc1792cd9893.json"
 export PROJECT_ID="zipkin-proxy"
 ```
