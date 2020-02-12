@@ -341,6 +341,25 @@ export PROJECT_ID="zipkin-proxy"
 
 ---
 
+### API Composition의 Response Time 감소 방안
+
+![API-Composition](images/api_composition.png)
+
+- FindOrderService에서 주문 상세 조립물을 만들기 위해 API를 순차적으로 호출한다면 API가 많으면 많을수록 응답 시간이 길어질 것이다. 예를 들어 OrderService, KitchenService, AccountingService는 각 1초가 걸렸지만 DeliveryService에서 5초가 걸렸다면 결과적으로 응답 시간은 8초가 걸린다.
+- 반면 동시에 API를 호출하여 데이터를 조립한다면 상대적으로 응답 시간을 줄일 수 있다.
+
+![ResponseTime](images/responsetime.png)
+
+- Java에서는 동시성을 Thread로 구현한다. Java 5에 도입된 `Concurrency API`(java.util.concurrent 패키지)를 사용하여 여러 Thread에 API 호출하는 작업을 할당하여 동시에 실행하는 것을 구현할 수 있다.
+
+![Concurrency](images/concurrency.png)
+
+- Java 8에서 Concurrency API 향상으로 도입된 것이 `CompletableFuture`이다. CompletableFuture는 비동기 작업들을 함께 묶을 수 있으며 더 나아가 단계로 구성할 수 있다.
+- 어떤 API는 중요한 정보가 아니라서 정해진 시간 이내에 응답이 오지 않으면 무시하고 결과를 전달할 필요가 있다.
+- Java 8의 CompletableFuture는 명시적으로 timeout을 지원하지 않는다. 다행히도 `Java 9`부터 CompletableFuture는 or `Timeou` 메소드를 지원한다.
+
+---
+
 # ■ Swagger 연동
 Usage of Swagger 2.0 in Spring Boot Applications to document APIs
 
