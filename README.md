@@ -110,16 +110,18 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 ---
 
-# ■ Netflix OSS (Hystrix/Ribbon/Eureka/Archaius)
+# ■ Netflix OSS (Hystrix/Ribbon/Eureka/Archaius) [![Sources](https://img.shields.io/badge/출처-Netflix-yellow)](https://github.com/Netflix)
 
 Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh Aware Code` 유형에 대한 실습을 진행해 본다.
 
   - microservice #1 : `displays`, port `8081` 
   - microservice #2 : `products`, port `8082`
-
+  - Eureka Server : `eureka-server`, port `8761` (http://localhost:8761)
+  - Zuul Server : `zuul`, port `8765`
 
 ## ■ Hystrix Dashboard
-- Hystrix Dashboard는 앞의 Hystrix 설정에 따른 Circuit breaker의 상태를 모니터링 할 수 있는 dashboard를 제공해주는 라이브러리이다. 사실 라이브러리라기 보다는 솔루션에 가깝다고 할 정도로 간단한 설정으로 실행할 수 있다.
+
+- Hystrix Dashboard는 앞의 Hystrix 설정에 따른 `Circuit Breaker`의 상태를 모니터링 할 수 있는 dashboard를 제공해주는 라이브러리이다. 사실 라이브러리라기 보다는 솔루션에 가깝다고 할 정도로 간단한 설정으로 실행할 수 있다.
 - Client 요청은 많은 traffic과 다양한 형태(예상하지 못한 형태)의 요청으로 경고없이 운영 이슈 발생 상황에 신속히 대응할 수 있는 시스템 zuul을 개발
 - zuul은 이런한 문제를 신속하고, 동적으로 해결하기 위해서 groovy 언어로 작성된 다양한 형태의 Filter를 실행한다.
 - Filter에 기능을 정의하고, 이슈사항에 발생시 적절한 filter을 추가함으로써 이슈사항을 대비할 수 있다.
@@ -137,7 +139,7 @@ Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh 
 
 ![zuul](images/Zuul_Core_Architecture.png)
 
-### Spring Cloud Zuul
+### Spring Cloud Zuul (Intelligent Routing)
 
 - Zuul-Core의 ZuulServlet을 그대로 사용하여, 아래 그림과 같이 Spring MVC 위에서 동작하기 위해 몇 가지를 추가
 
@@ -155,14 +157,14 @@ Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh 
 
 ### Zuul의 build.gradle에 dependency 추가
 
-```
+```bash
 compile('org.springframework.cloud:spring-cloud-starter-netflix-hystrix-dashboard')
 compile('org.springframework.boot:spring-boot-starter-actuator')
 ```
 
 ### Zuul의 application.yml에 management 추가
 
-```yml
+```bash
 spring:
   application:
     name: zuul
@@ -209,11 +211,69 @@ public class ZuulApplication {
 
 ![dashboard2](images/dashboard2.png)
 
+
+### Isolation Starategy
+
+- 격리 전략이란 일종의 Bulkhead Pattern이며, 각 서비스에 대한 dependency을 격리하고 동시 접근을 제한한다.
+- 아래 그림에서 빨간색으로 표기된 상자는 특정 서비스의 호출이 지연되고 있다는 의미이며, 나머지 서비스에는 영향을 주지 않고 있다. 또한, 동시 접근 제한을 서비스별로 다르게 설정하고 있다.
+
+![isolation](images/isolation.png)
+
+- Isolation의 방법으로는 두 가지가 있다.
+  1. `Thread & Thread Pools` [![Sources](https://img.shields.io/badge/출처-Thread-yellow)](https://github.com/Netflix/Hystrix/wiki/How-it-Works#threads--thread-pools)
+    - 서비스 호출이 별도의 thread에서 수행된다. 이렇게 하면 네트워크상의 timeout 위에 thread timeout을 둘 수 있다.
+    - 하지만 별도의 thread를 사용하는 만큼 비용이 드는데 여기서는 이를 가리켜 연산 오버헤드(Computational Overhead)라고 표현한다.
+    - HystrixCommand를 사용할 때는 Thread isolation을 권장하고 있다.
+  2. `Semaphore`
+    - 서비스 호출을 위해 별도의 thread를 만들지 않는다. 단지 각 서비스에 대한 동시 호출 수를 제한할 뿐이다.
+
+![isolation-thread-vs-semaphore](images/isolation-thread-vs-semaphore.png)
+
+```bash
+zuul:
+  routes:
+    product:
+      path: /products/**
+      serviceId: product
+      stripPrefix: false
+    display:
+      path: /displays/**
+      serviceId: display
+      stripPrefix: false
+
+  ribbon-isolation-strategy: thread <- "이번 실습에서는 Thread 방식을 사용한다."
+  thread-pool:
+    use-separate-thread-pools: true
+    thread-pool-key-prefix: zuul-
+...(중략)...
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000
+    product:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000 <- "Thread에 대한 timeout을 설정한다."
+  threadpool:
+    zuul-product:
+      coreSize: 30
+      maximumSize: 100
+      allowMaximumSizeToDivergeFromCoreSize: true
+    zuul-display:
+      coreSize: 30
+      maximumSize: 100
+      allowMaximumSizeToDivergeFromCoreSize: true
+```
+
 ---
 
 ## Zipkin
 
-- Zipkin으로 추적할 수 있는 분산 트렌젝션은 HTTP를 기본으로 지원하고 , 이외에도 많이 사용되는 리모트 프로토콜인 gRPC를 함께 지원한다.
+- Zipkin으로 추적할 수 있는 분산 트렌젝션은 HTTP를 기본으로 지원하고, 이외에도 많이 사용되는 리모트 프로토콜인 gRPC를 함께 지원한다.
 - Zipkin 클라이언트 SDK는 [![Sources](https://img.shields.io/badge/출처-Zipkin-yellow)](https://zipkin.io/pages/existing_instrumentations)에 있는데, Zipkin에서 공식적으로 지원하는 라이브러는 아래와 같이 C#, Go, Java, Javascript,Ruby,Scala 등이 있다.
 - Zipkin 라이브러리는 수집된 트렌젝션 정보를 zipkin 서버의 collector 모듈로 전송한다. 이 때 다양한 프로토콜을 사용할 수 있는데, 일반적으로 HTTP를 사용하고, 시스템의 규모가 클 경우에는 Kafka Queue를 넣어서 Kafka Protocol로 전송이 가능하다.
 - Zipkin Client SDK에 의해서 전송된 정보는 Storage(In-Memory, MySQL, Cassandra, Elastic Serch)에 저장할 수 있다.
@@ -227,7 +287,7 @@ public class ZuulApplication {
 
 # ■ Spring Sleuth를 이용한 Zipkin 연동
 
-- application에서 Distributed Log Trace를 해보자.
+- Application에서 Distributed Log Trace를 해보자.
 - Spring Boot application을 Zipkin과 연동하기 위해서는 `Sleuth`라는 Library를 사용하면 된다.
 - Java application에서 Trace 정보와 Span 정보를 넘길 때, 여러 class의 method들을 거쳐서 transaction이 완성될때, Trace 정보와 Span 정보 Context가 유지가 되어야 하는데, thread마다 할당되는 thread의 일종의 전역변수인 Thread Local 변수에 이 Trace와 Span Context 정보를 저장하여 유지한다.
 - 분산 트렌젝션은 HTTP나 gRPC로 들어오기 때문에, Spring Sleuth는 HTTP request가 들어오는 시점과 HTTP request가 다른 서비스로 나가는 부분을 wrapping하여 Trace와 Span Context를 전달한다.
@@ -240,14 +300,14 @@ public class ZuulApplication {
 
 ### MicroService의 build.gradle에 Zipkin 및 Sleuth dependency 추가
 
-```
+```bash
 compile('org.springframework.cloud:spring-cloud-starter-zipkin')
 compile('org.springframework.cloud:spring-cloud-starter-sleuth')
 ```
 
 ### MicroService의 application.yml에 zipkin 및 sample 추가
 
-```yaml
+```bash
 spring:
   application:
     name: display
@@ -370,7 +430,7 @@ Usage of Swagger 2.0 in Spring Boot Applications to document APIs
 
 ### MicroService의 build.gradle에 Swagger dependency 추가
 
-```
+```bash
 compile('io.springfox:springfox-swagger2:2.9.2')
 compile('io.springfox:springfox-swagger-ui:2.9.2')
 ```
@@ -570,7 +630,7 @@ $ export PATH=$PWD/bin:$PATH
 
 ## Service Tools
 
-- `Prometheus` : System 모니터링 및 Alert을 위한 Toolkit으로, CNCF(Cloud Native Computing Foundation)의 2번째 호스팅 프로젝트로 선정될 정도로 활발한 오픈소스 모니터링 프로젝트이다. (첫번째는 Kubernetes)
+- `Prometheus` : System 모니터링 및 Alert을 위한 Toolkit으로, CNCF(Cloud Native Computing Foundation)의 2번째 호스팅 프로젝트로 선정될 정도로 활발한 오픈소스 모니터링 프로젝트이다. (첫번째는 Kubernetes). 다만, Scale-out이 안되는 구조라 Pod의 Size(CPU/MEM/Disk)를 늘려야 한다.
 - `Grafana` : 등록되어 있는 서비스(Application)과 상호작용하는 쿼리, 통신, 상태 등을 시각적으로 보기 좋게 나열해주는 Metrics Visualization 도구이다.
 - `Jaeger Tracing` : 등록되어 있는 서비스들의 시계열 데이터를 모아 Tracking을 제공해주는 toolkit으로 troubleshooting, Latency issue 등을 tracing할 수 있는 MSA 환경에서의 분산 트레이싱 도구이다.
 - `Kiali` (https://www.kiali.io/) : Istio에 의해서 수집된 각종 지표를 기반으로, 서비스간의 관계를 시각화하여 나타낼 수 있다.
