@@ -510,11 +510,11 @@ private ApiInfo apiInfo() {
 - Istio는 서비스 네트워크 전체에 걸쳐 다음과 같은 다양한 주요 기능을 제공한다.
   - `Traffic Management` : Istio의 쉬운 규칙 구성 및 트래픽 라우팅을 통해 서비스 간의 트래픽 및 API호출 흐름을 제어할 수 있다. 또한 circuit breakers, timeout 및 재시도와 같은 서비스 레벨 속성의 구성을 단순화하고 A4B test, canary rollout, 백분율 기반 트래픽 분할과 같은 중요한 작업을 쉽게 설정할 수 있다.
 
-  ![traffic_mgmt.png](images/traffic_mgmt.png.png)
+  ![traffic_mgmt.png](images/traffic_mgmt.png)
 
   - `Security` : 기본 보안 통신 채널을 제공하고 서비스 통신의 인증, 권한 부여 및 암호화를 규모에 맞게 관리할 수 있다. 기본적으로 envoy를 통해서 통신하는 모든 트래픽을 자동으로 TLS를 이용해서 암호화한다. 즉 서비스간의 통신이 디폴트로 암호화 된다.
 
-  ![security](images/security.png.)  
+  ![security](images/security.png)  
 
   - `Policies` : Istio를 사용하면 다음과 같은 규칙을 런타임에 적용하도록 응용 프로그램에 대한 사용자 지정 정책을 구성할 수 있다.
     - 서비스에 대한 트래픽을 동적으로 제한하는 속도 제한
@@ -554,11 +554,11 @@ private ApiInfo apiInfo() {
   - Mesh를 관리하기 위한 ID 및 서비스 Authentication을 위해 TLS를 사용한 Service-To-Service Enduser 인증을 제공한다.
   - Service Mesh에서 암호화되지 않은 트래픽을 전송하는 데 사용할 수 있으며, 운영자는 네트워크 컨트롤 대신 Service ID를 기반으로 정책을 시행할 수 있다.
 
-### Getting Started
+## Getting Started
 
 - Istio를 설치하기 위해서는 Kubernetes 기반의 Platform이 준비되어야 한다. [`Openshift 3.7(Kubernetes 1.7)`]
 
-#### Release Download [![Sources](https://img.shields.io/badge/출처-IstioRelease-yellow)](https://github.com/istio/istio/releases/tag/1.4.4)
+### Release Download [![Sources](https://img.shields.io/badge/출처-IstioRelease-yellow)](https://github.com/istio/istio/releases/tag/1.4.4)
 
 - 현재 Istio의 최신 버전은 `1.4.4` 이다.
 
@@ -568,7 +568,7 @@ $ cd istio-1.4.4
 $ export PATH=$PWD/bin:$PATH
 ```
 
-### Service Tools
+## Service Tools
 
 - `Prometheus` : System 모니터링 및 Alert을 위한 Toolkit으로, CNCF(Cloud Native Computing Foundation)의 2번째 호스팅 프로젝트로 선정될 정도로 활발한 오픈소스 모니터링 프로젝트이다. (첫번째는 Kubernetes)
 - `Grafana` : 등록되어 있는 서비스(Application)과 상호작용하는 쿼리, 통신, 상태 등을 시각적으로 보기 좋게 나열해주는 Metrics Visualization 도구이다.
