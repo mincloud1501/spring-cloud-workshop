@@ -114,6 +114,9 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 Library로 구현되어 API 호출을 통해 Service Mesh에 결합되는 `Mesh Aware Code` 유형에 대한 실습을 진행해 본다.
 
+  - microservice #1 : `displays`, port `8081` 
+  - microservice #2 : `products`, port `8082`
+
 
 ## ■ Hystrix Dashboard
 - Hystrix Dashboard는 앞의 Hystrix 설정에 따른 Circuit breaker의 상태를 모니터링 할 수 있는 dashboard를 제공해주는 라이브러리이다. 사실 라이브러리라기 보다는 솔루션에 가깝다고 할 정도로 간단한 설정으로 실행할 수 있다.
@@ -498,6 +501,85 @@ private ApiInfo apiInfo() {
 
 9. `Datastore와 연결 해제 및 Decouple시 고려사항`
   - 신규 서비스의 API Interface를 backend direct로 연결된 것이 아닌 gateway 모듈로 연결하여 완전한 De-coupling 구조로 만든다.
+
+---
+
+# ■ Istio [![Sources](https://img.shields.io/badge/출처-Istio-yellow)](https://istio.io/docs/concepts/what-is-istio/)
+
+- Istio를 사용하면 서비스 코드의 코드 변경 없이 로드 밸런싱, 서비스 간 인증, 모니터링 등을 통해 배포된 서비스의 네트워크를 쉽게 생성할 수 있다.
+- Istio는 서비스 네트워크 전체에 걸쳐 다음과 같은 다양한 주요 기능을 제공한다.
+  - `Traffic Management` : Istio의 쉬운 규칙 구성 및 트래픽 라우팅을 통해 서비스 간의 트래픽 및 API호출 흐름을 제어할 수 있다. 또한 circuit breakers, timeout 및 재시도와 같은 서비스 레벨 속성의 구성을 단순화하고 A4B test, canary rollout, 백분율 기반 트래픽 분할과 같은 중요한 작업을 쉽게 설정할 수 있다.
+
+  ![traffic_mgmt.png](images/traffic_mgmt.png.png)
+
+  - `Security` : 기본 보안 통신 채널을 제공하고 서비스 통신의 인증, 권한 부여 및 암호화를 규모에 맞게 관리할 수 있다. 기본적으로 envoy를 통해서 통신하는 모든 트래픽을 자동으로 TLS를 이용해서 암호화한다. 즉 서비스간의 통신이 디폴트로 암호화 된다.
+
+  ![security](images/security.png.)  
+
+  - `Policies` : Istio를 사용하면 다음과 같은 규칙을 런타임에 적용하도록 응용 프로그램에 대한 사용자 지정 정책을 구성할 수 있다.
+    - 서비스에 대한 트래픽을 동적으로 제한하는 속도 제한
+    - 서비스 액세스 제한을 위한 부정, 화이트 리스트 및 블랙 리스트
+    - 헤더 다시 쓰기 및 리디렉션
+
+  - `Observability` : 강력한 추적, 모니터링 및 로깅 기능을 통해 서비스와 서비스 간의 종속성을 관리하며, 트래픽 간의 특성 및 흐름을 파악하여 이슈를 신속하게 파악할 수 있다.
+  - `Platform Support` : Istio는 Cloud, On-premise, Kubernetes, Mesos 등 다양한 기반 환경에서 실행할 수 있도록 설계되었다. 현재는 Kubernetes에 중점을 두고 있지만, 곧 다른 환경을 지원하기 위해 커뮤니티가 진행되고 있다.
+  - `Policy Enforcement` : 서비스 간 상호 작용에 대해 access, role 등의 정책을 설정하여 리소스가 각 서비스에게 공정하게 분배되도록 제어한다. 이 정책 변경에 대한 부분은 application 소스를 직접 수정하는 것이 아니라 mesh로 제어가 된다.
+  - `Integration and Customization` : 정책 집행이 가능한 영역을 확장하기 위하여 mesh의 연결에 대한 부분을 커스터마이징하여 ACLs, Logging, Monitoring, quotas, auditing 등의 기존 솔루션과 통합할 수 있다.
+
+- Istio Service Mesh는 논리적으로 Data Plane과 Control Plane으로 나뉜다.
+- `Data Plane`은 Microservice 사이의 모든 네트워크 통신을 조정하고, 제어하는 Kubernetes의 Application Pod에 Sidecar Container로 배치된 Envoy Proxy로 구성된다.
+- `Control Plane`은 Pilot, Mixer, Istio-Auth로 구성되어 런타임에 정책을 시행 할뿐만 아니라 트래픽을 라우팅하기 위해 프록시를 관리 및 구성한다.
+
+![istio](images/istio_diagram.png)
+
+- `Envoy`
+  - C++로 개발된 고성능 Proxy Sidecar로서 Service Mesh의 모든 서비스에 대한 Inbound/Outbound 트래픽을 처리한다.
+  - Dynamic Service Discovery, Load Balancing, TLS Termination, HTTP/2 & gRPC Proxying, Circuit Breakers, Health Checks, %-based Traffic Split, Fault Injection, Rich Metrics 등의 기능을 포함한다.
+
+  ![health_check](images/health_check.png)
+
+  - 동일한 Kubernetes Pod의 Application Service에 Sidecar로 배치된다. 이를 통해 Istio는 트래픽 동작에 대한 데이터를 attribute로 추출할 수 있고, Mixer에서 정책을 관리하는데 사용할 수 있으며, 모니터링 시스템(Prometheus, Grafana 등)에 보내져 전체 Mesh의 동작에 대한 정보를 관리할 수 있다.
+
+- `Mixer`
+  - Service Mesh 전체 영역에서 액세스 제어 및 사용 정책을 정의하고, Envoy Proxy 및 기타 서비스에서 데이터를 원격에서 수집하는 독립 모듈이다.
+  - Request Level attribute를 추출하여 평가를 위해 Mixer로 데이터를 보낸다.
+  - Plugin이 가능한 adaptor 구조로, 운영하는 인프라에 맞춰서 logging 및 monitoring system 변경이 가능하다. k8s에서 많이 사용되는 Heapster나 Prometheus에서부터 GCP의 StackDriver, 전문 모니터링 서비스인 Datadog등으로 저장이 가능하다.
+
+- `Pilot`
+  - Envoy Sidecar에 대한 서비스 검색, 지능형 라우팅 (예 : A/B 테스트, Canary 배치 등) 및 Resiliency (timeout, retries, circuit breakers 등)을 위한 트래픽 관리 기능을 제공한다. 
+  - 특정 트래픽 정책을 Envoy Sidecar Container로 전달하여 라우팅 규칙들을 적용시켜준다.
+  - Pilot은 플랫폼에 종속되지 않고, Envoy Data Plane을 준수하는 모든 Sidecar에 표준 format으로 통합시킨다.
+
+- `Istio-Auth`
+  - Mesh를 관리하기 위한 ID 및 서비스 Authentication을 위해 TLS를 사용한 Service-To-Service Enduser 인증을 제공한다.
+  - Service Mesh에서 암호화되지 않은 트래픽을 전송하는 데 사용할 수 있으며, 운영자는 네트워크 컨트롤 대신 Service ID를 기반으로 정책을 시행할 수 있다.
+
+### Getting Started
+
+- Istio를 설치하기 위해서는 Kubernetes 기반의 Platform이 준비되어야 한다. [`Openshift 3.7(Kubernetes 1.7)`]
+
+#### Release Download [![Sources](https://img.shields.io/badge/출처-IstioRelease-yellow)](https://github.com/istio/istio/releases/tag/1.4.4)
+
+- 현재 Istio의 최신 버전은 `1.4.4` 이다.
+
+```bash
+$ curl -L https://istio.io/downloadIstio | sh -
+$ cd istio-1.4.4
+$ export PATH=$PWD/bin:$PATH
+```
+
+### Service Tools
+
+- `Prometheus` : System 모니터링 및 Alert을 위한 Toolkit으로, CNCF(Cloud Native Computing Foundation)의 2번째 호스팅 프로젝트로 선정될 정도로 활발한 오픈소스 모니터링 프로젝트이다. (첫번째는 Kubernetes)
+- `Grafana` : 등록되어 있는 서비스(Application)과 상호작용하는 쿼리, 통신, 상태 등을 시각적으로 보기 좋게 나열해주는 Metrics Visualization 도구이다.
+- `Jaeger Tracing` : 등록되어 있는 서비스들의 시계열 데이터를 모아 Tracking을 제공해주는 toolkit으로 troubleshooting, Latency issue 등을 tracing할 수 있는 MSA 환경에서의 분산 트레이싱 도구이다.
+- `Kiali` (https://www.kiali.io/) : Istio에 의해서 수집된 각종 지표를 기반으로, 서비스간의 관계를 시각화하여 나타낼 수 있다.
+
+![kiali](images/kiali.png)
+
+- `Servicegraph` : Mesh 안에서 서비스들의 그래프를 나타내주는 toolkit이다.
+
+![servicegraph](images/servicegraph.png)
 
 ---
 
