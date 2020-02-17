@@ -6,9 +6,29 @@
 MSA Development Project with Spring Boot using Netflix OSS
 
 ![agile_coding](images/agile_coding.png)
+![history](images/history.png)
+
+# ■ Monolithic -> SOA -> MSA
+
+- Application 개발 초기에는 기존 application에 최소한의 변경 사항이 있어도 자체 QA(Quality Assurance) 주기에 따라 대규모 update를 해야 했다.
+- 전체 application의 source code는 하나의 배포 unit(.war or .ear 등)으로 내장되기 때문에 이런 방식을 `Monolithic`이라고 부른다.
+- 일부 application의 update로 인해 오류가 발생할 경우, 전체를 offline으로 전환하고 운영 규모를 축소시킨 다음 문제를 해결해야 했다. 이러한 방식은 소규모 application션에서 여전히 실행 가능하지만, 성장하는 기업들은 downtime을 감당할 수 없다.
+
 ![mono_vs_msa](images/mono_msa.png)
+
+- `Service Oriented Architecture(SOA)`는 application을 별개의 재사용 가능한 서비스 단위로 분할하며, 이 service들은 `Enterprise Service Bus(ESB)`를 통해 통신한다.
+- 특정 Business Process를 기반으로 구성된 개별 서비스가 통신 프로토콜(SOAP, ActiveMQ, Apache Thrift 등)을 준수하며 ESB를 통해 공유된다. 즉, 이러한 서비스 요소가 ESB를 통해 통합되어 하나의 애플리케이션을 구성한다.
+- 서비스의 구축, 테스트, 수정을 동시에 수행할 수 있기 때문에 더 이상의 monolithic 개발 주기는 필요가 없다. 그러나 ESB는 전체 시스템의 단일 장애점(single point of failure)을 나타내기 때문에 이러한 방식에서 monolithic 제거는 새로운 monolithic을 만들어낼 뿐이며, 잠재적으로 ESB가 전체 조직의 자체적인 장애 요소로 작용할 수 있다.
+
 ![soa_vs_msa](images/soa_msa1.png)
-![msa_sample](images/msa_sample.png)
+
+- `Microservice`는 Stateless 방식으로 서로 통신을 할 수 있으므로, 이러한 방식으로 구축된 application은 내결함성이 더 높고 단일 ESB에 대한 의존성은 더 낮다.
+- Microservice가 programing 언어에 구속 받지 않는 API이기 때문에 개발팀이 자체 tool을 선택할 수도 있다.
+- SOA의 본질적 기능을 감안하면 microservice는 완전히 새로운 개념은 아니다. microservice는 `Containerized` 기술의 발달에 힘입어 유용성이 향상되었다.
+- Linux Container를 활용해 application의 여러 조각들을 독립적으로 작동시킬 수 있으며, 각 개별 요소 및 lifecycle에 대한 통제력은 훨씬 강화되었다.
+- Containerized Microservice는 API 및 `DevOps`와 함께 Cloud Native Application의 기반이 된다.
+
+![microservice_condition](images/microservice_condition.png)
 
 
 # ■ MSA Components
