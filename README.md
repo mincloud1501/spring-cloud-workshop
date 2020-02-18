@@ -30,6 +30,35 @@ MSA Development Project with Spring Boot using Netflix OSS
 
 ![microservice_condition](images/microservice_condition.png)
 
+---
+
+# ■ MSA Architecture Diagram
+
+- UI는 HTTP를 통해 API Gateway에 request 한다.이 요청은 `Command` 또는 `Query`중 하나이다.
+- Command은 Command만 수신하는 domain microservice로 전달되며, query를 전혀 허용하지 않는다.
+- `Domain Microservice`는 명령을 수신하여 event를 memory에 유지하고, Event Store Database에 지속할 이벤트를 전송한다. 또한, 이러한 이벤트를 Service Bus에 publish한다.
+- `Read Model Microservice`는 이 event에 관심이 있으므로, service bus를 통해 이 이벤트를 수신하고 정규화되지 않은 데이터의 버전을 업데이트하고 쿼리를 준비한다.
+- 요청이 "query인 경우 read model microservice로 전송되다.
+
+![Architecture_Diagram](images/architecture_diagram.png)
+
+### Domain Microservice
+
+- `Web API Controller`는 명령만 허용하며, 명령을 받으면 Command Handler로 전달한다.
+- `Command Handler`가 명령을 Aggregate에 보내 명령과 관련된 Business Logic을 실행한다.
+- Command Handler에 aggregate 작업이 완료되면, event가 지속될 준비가 되었다는 알림이 표시된다.
+- `Event Store Repository`를 통해 이벤트 저장소에 이벤트가 유지되고, 동일한 이벤트가 service bus에 publish되어 다른 서비스에서 사용된다.
+
+![Domain_Microservice](images/domain_microservice.png)
+
+### Query Microservice
+
+- `Web API Controller`가 query를 수신한다.
+- controller가 Query Handler에 query를 전달하고, 쿼리 처리기는 데이터 모델에서 쿼리 판독치를 실행하기만 하면 데이터를 반환한다.
+
+![Query_Microservice](images/query_microservice.png)
+
+---
 
 # ■ MSA Components
 
