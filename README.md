@@ -5,11 +5,10 @@
 
 MSA Development Project with Spring Boot using Netflix OSS & Istio.io
 
-# MicroServices
+# MicroServices [![Sources](https://img.shields.io/badge/출처-martinFowler-yellow)](https://martinfowler.com/articles/microservices.html)
 
-```
 The term "Microservice Architecture" has sprung up over the last few years to describe a particular way of designing software applications as suites of independently deployable services. While there is no precise definition of this architectural style, there are certain common characteristics around organization around business capability, automated deployment, intelligence in the endpoints, and decentralized control of languages and data. (defined by Martin Fowler, 25 March 2014)
-```
+
 
 ![agile_coding](images/agile_coding.png)
 
@@ -51,6 +50,8 @@ The term "Microservice Architecture" has sprung up over the last few years to de
 - Containerized Microservice는 API 및 `DevOps`와 함께 Cloud Native Application의 기반이 된다.
 
 ![microservice_condition](images/microservice_condition.png)
+
+### 즉, Service별 독립적인 Architecture 구성 및 DevOps의 문화가 조성되어야만 성공적인 MSA 구축이 가능하다!! (using k8s)
 
 ---
 
@@ -711,6 +712,26 @@ $ export PATH=$PWD/bin:$PATH
 - `Servicegraph` : Mesh 안에서 서비스들의 그래프를 나타내주는 toolkit이다.
 
 ![servicegraph](images/servicegraph.png)
+
+---
+
+# ■ 결론 [![Sources](https://img.shields.io/badge/출처-Gartner-yellow)](http://www.comworld.co.kr/news/articleView.html?idxno=49710)
+
+1. `MSA, 조직의 문화가 준비돼 있어야`
+  - MSA를 채택할 때에는 무엇보다 비즈니스를 중심으로 생각해야 한다. 비용은 물론 기술적·조직적 제약 조건을 충족시키는 세밀성과 분해의 올바른 균형을 찾는 것이 목표가 되어야 한다.
+  - MSA라는 것은 결국 지속적으로 변화가 필요할 때 변화에 빨리 대응하기 위해 도입하는 것이고, 그렇게 해야만 혜택이 생긴다. 그러나 특정 조직이 언제까지 뭔가를 해야 한다는 데드라인을 요구한다면 MSA의 효과를 충족시키지 못하게 된다.
+
+2. `MSA, 만능은 아니지만 준비돼 있다면 가치 크다`
+  - MSA를 기술적인 프로젝트로만 간주해서 진행하면 안 되고, 비즈니스 가치를 제공하기 위한 것이라는 것을 염두에 두고 진행해야 한다
+  - MSA가 가치를 제공하기 위해서는 지속적인 애플리케이션의 변화를 신속하게 따라가면서 서비스를 선보여야 하는데, 만약 어떤 조직이 애플리케이션을 개발해 놓고 변화 없이 그대로 가는 경우에는 굳이 MSA가 필요 없다
+  - MSA에서 가치나 효과를 기대하기 위해서는 개발이 신속하게 이뤄져야 하는데, 그 전제조건으로 agile한 개발, DevOps라던가 통합 파이프라인, 테스팅 자동화, 인프라 등이 갖춰져야 한다는 점이다. 이러한 부분이 되지 않으면 전환해봐야 별다른 가치를 갖지 못한다.
+  - 전환과정이 점진적으로 이뤄져야 한다. monolithic에서 MSA로 가는 부분에 있어 단계별 접근이 필요하다. 처음에는 큰 부분(macro)에서부터 점점 작은 부분(micro)으로 가면서, 효과를 체크하면서 가야 한다. 얻을 수 있는 가치가 적어지기 시작하면 micro로 갈 필요가 없다는 것이다. 때문에 단계적으로 추진해야 한다.
+  - 결국 MSA를 통해 애플리케이션 개발의 전deployment model을 바꾸는 건데, 이 과정에서 어떤 혜택을 얻으려면 모든 것이 `API`에 기반을 두고 이뤄져야만 한다. 그래야 code 등을 변경해도 다른 애플리케이션에는 영향 없이 할 수 있다. 그리고 이 API를 활용해 애플리케이션 코드를 재모듈화(remodulization)해 분해하고, 또 재배포하는 모델을 갖춰야 한다.
+
+3. `현업이 주도하고 위에서 지원…‘목표’ 돼선 안돼`
+  - 어떤 부분들이 우리의 제약 요건인지, 방해 요소인지 파악하고 생각지 않았던 잠재적 이슈나 부작용, 실패 등을 파악해야 한다.
+  - MSA가 적절한 가치를 산출하려면 비즈니스 가치를 위한 수단이 돼야 한다. 그렇지 않으면 MSA를 남용하거나, 과대평가되고 목표가 돼서 추진될 가능성이 있다.
+  - Netflix, Amazon, eBay 등 성공사례를 보더라도 이들 역시 굉장히 점진적으로 다양한 Level에서 MSA를 도입, 실행하고 있다. 완전히 MSA를 하기보다는 이렇게 조금씩 하다 보면 그 과정에서 배우는 것이 생기고, 또 기술을 개발하면서 점차 나아가는 게 최선이라고 생각한다.
 
 ---
 
