@@ -8,6 +8,16 @@ MSA Development Project with Spring Boot using Netflix OSS
 ![agile_coding](images/agile_coding.png)
 ![history](images/history.png)
 
+### 2014년 `Docker`의 출현 시점 부터 `Microservices`에 대한 관심이 높아지기 시작했다!!
+
+![microservices_trends](images/microservices_trends.png)
+
+### Container Management Solution은 2017년말을 기점으로 해서 `Kubernetes`가 de-facto 표준이 되었다!
+
+![kubernetes_trends](images/kubernetes_trends.png)
+
+---
+
 # ■ Monolithic -> SOA -> MSA
 
 - Application 개발 초기에는 기존 application에 최소한의 변경 사항이 있어도 자체 QA(Quality Assurance) 주기에 따라 대규모 update를 해야 했다.
@@ -37,8 +47,8 @@ MSA Development Project with Spring Boot using Netflix OSS
 - UI는 HTTP를 통해 API Gateway에 request 한다.이 요청은 `Command` 또는 `Query`중 하나이다.
 - Command은 Command만 수신하는 domain microservice로 전달되며, query를 전혀 허용하지 않는다.
 - `Domain Microservice`는 명령을 수신하여 event를 memory에 유지하고, Event Store Database에 지속할 이벤트를 전송한다. 또한, 이러한 이벤트를 Service Bus에 publish한다.
-- `Read Model Microservice`는 이 event에 관심이 있으므로, service bus를 통해 이 이벤트를 수신하고 정규화되지 않은 데이터의 버전을 업데이트하고 쿼리를 준비한다.
-- 요청이 "query인 경우 read model microservice로 전송되다.
+- `Read Model Microservice`는 이 event에 관심이 있으므로, service bus를 통해 이 이벤트를 수신하고 정규화되지 않은 data의 version을 update하고 query를 준비한다.
+- 요청이 "query"인 경우 read model microservice로 전송된다.
 
 ![Architecture_Diagram](images/architecture_diagram.png)
 
