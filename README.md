@@ -3,18 +3,30 @@
 [![Swagger](https://img.shields.io/badge/Swagger-2.0-brightgreen)](https://spring.io/guides/gs/rest-service/)&nbsp;
 ![](https://img.shields.io/github/repo-size/mincloud1501/spring-cloud-workshop.svg?label=Repo%20size&style=flat-square)&nbsp;
 
-MSA Development Project with Spring Boot using Netflix OSS
+MSA Development Project with Spring Boot using Netflix OSS & Istio.io
+
+# MicroServices
+
+```
+The term "Microservice Architecture" has sprung up over the last few years to describe a particular way of designing software applications as suites of independently deployable services. While there is no precise definition of this architectural style, there are certain common characteristics around organization around business capability, automated deployment, intelligence in the endpoints, and decentralized control of languages and data. (defined by Martin Fowler, 25 March 2014)
+```
 
 ![agile_coding](images/agile_coding.png)
+
+- Netflix는 Circuit Breaker, Edge Routing, Service Discovery, Load Balancing 등의 기능을 위해 Java를 주축으로 하는 일련의 기술을 만들어 이후 Opensource화 했다. (`Netflix OSS`)
+- 이 시점(2010년~ )만 해도 Virtual Machine이 Cloud에서 application을 실행하기 위해 사실상 유일한 방법이었다. Netflix는 Service Mesh 기능을 위한 언어 Platform으로 Java를 선택했다.
+
 ![history](images/history.png)
 
-### 2014년 `Docker`의 출현 시점 부터 `Microservices`에 대한 관심이 높아지기 시작했다!!
+### 2014년 Container Platform인 `Docker`의 등장과 함께 `Microservices`에 대한 관심이 높아지기 시작했다!!
 
 ![microservices_trends](images/microservices_trends.png)
 
-### Container Management Solution은 2017년말을 기점으로 해서 `Kubernetes`가 de-facto 표준이 되었다!
+### Containerized Application Management Solution은 2017년말을 기점으로 해서 `Kubernetes`가 de-facto 표준이 되었다!
 
 ![kubernetes_trends](images/kubernetes_trends.png)
+
+- k8s가 등장하면서 서비스 검색, 로드밸런싱과 같은 기능이 플랫폼의 일부가 되어 사용된 언어에 관계없이 모든 애플리케이션에서 활용할 수 있게 되었다.
 
 ---
 
