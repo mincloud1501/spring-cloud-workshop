@@ -562,6 +562,13 @@ private ApiInfo apiInfo() {
 - MSA가 비즈니스 확장성 및 생산성에 큰 이점이 있는 것은 사실이지만, 어떤 경우에는 Monolith를 그대로 유지하여 개발하고, 운영하는 것이 더 큰 business value를 가져다 주기도 한다.
 - Monolith는 단일 객체 그 자체이기 때문에, 해당 architecture에 속해 있는 데이터 모델 및 데이터베이스를 변경하는 것은 매우 어렵거나 거의 불가능에 가깝다. 이를 위해서는 데이터에 대한 Refactoring이 필요하다.
 
+### Microservice Architecture의 구현 단계
+
+[출처: A Microservices Maturity Model, from “Spring 5.0 Microservices,” 2nd Edition”by Rajesh R V (O’Reilly)]
+
+![msa_architecture_level](images/msa_architecture_level.png)
+
+
 ### Microservice Decomposition
 
 - 코드의 API화나 Integration 등에 대한 이야기 보다는 종속된 데이터 관계를 어떻게 분리시킬 것인지, 분리된 데이터 관계로 인한 모듈화가 중요하다.
