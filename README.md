@@ -693,9 +693,255 @@ private ApiInfo apiInfo() {
   - Mesh를 관리하기 위한 ID 및 서비스 Authentication을 위해 TLS를 사용한 Service-To-Service Enduser 인증을 제공한다.
   - Service Mesh에서 암호화되지 않은 트래픽을 전송하는 데 사용할 수 있으며, 운영자는 네트워크 컨트롤 대신 Service ID를 기반으로 정책을 시행할 수 있다.
 
-## Getting Started
+## Getting Started with Istio and k8s [![Sources](https://img.shields.io/badge/출처-katacoda-yellow)](https://www.katacoda.com/courses/istio/deploy-istio-on-kubernetes)
 
 - Istio를 설치하기 위해서는 Kubernetes 기반의 Platform이 준비되어야 한다. [`Openshift 3.7(Kubernetes 1.7)`]
+
+```bash
+$ launch.sh
+Waiting for Kubernetes to start...
+Kubernetes started
+
+$ kubectl cluster-info
+Kubernetes master is running at https://172.17.0.9:6443
+KubeDNS is running at https://172.17.0.9:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+#### Deploy Istio
+
+- Istio backed services를 관리하고 deploy를 위해 사용할 CLI tooling과 Istio를 지원하기 위한 k8s cluster 설정을 위한 intall 진행
+
+```bash
+$ curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.0 sh -
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  3015  100  3015    0     0   4028      0 --:--:-- --:--:-- --:--:-- 45000
+Downloading istio-1.0.0 from https://github.com/istio/istio/releases/download/1.0.0/istio-1.0.0-linux.tar.gz ...  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   635  100   635    0     0   3714      0 --:--:-- --:--:-- --:--:--  3735
+100 14.1M  100 14.1M    0     0   278k      0  0:00:52  0:00:52 --:--:--  559k
+Istio 1.0.0 Download Complete!
+
+Istio has been successfully downloaded into the istio-1.0.0 folder on your system.
+```
+
+- path에 bin 폴더 추가
+
+```bash
+$ export PATH="$PATH:/root/istio-1.0.0/bin"
+$ cd /root/istio-1.0.0
+```
+
+- Custom Resource Definitions (CRD)를 통해 k8s를 확장한다. (crds.yaml)
+
+```bash
+$ kubectl apply -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system
+```
+
+- 기본적으로 상호 TLS 인증을 적용한다.
+
+```bash
+$ kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+```
+
+- Pods로 배포된 모든 서비스 확인한다.
+
+```bash
+$ kubectl get pods -n istio-system
+NAME                                      READY   STATUS      RESTARTS   AGE
+grafana-fff7f4b74-gdxqf                   1/1     Running     0          96s
+istio-citadel-65bf48d985-k4jrs            1/1     Running     0          96s
+istio-cleanup-secrets-l5mdj               0/1     Completed   0          98s
+istio-egressgateway-bf5775d64-bl5nr       1/1     Running     0          96s
+istio-galley-8485bfc668-vlb26             1/1     Running     0          97s
+istio-grafana-post-install-vhb7s          0/1     Completed   0          99s
+istio-ingressgateway-6796bc5c85-78ksf     1/1     Running     0          96s
+istio-pilot-6995fb8f49-4tb8k              2/2     Running     0          96s
+istio-policy-77cb84dbd7-qr8cc             2/2     Running     0          96s
+istio-security-post-install-dnm6s         0/1     Completed   0          98s
+istio-sidecar-injector-7f6fdc7989-nhhsn   1/1     Running     0          95s
+istio-statsd-prom-bridge-5b596dfc-7pkd6   1/1     Running     0          97s
+istio-telemetry-5d7b78dc5b-74pxl          2/2     Running     0          96s
+istio-tracing-c8b67b59c-8m6r2             1/1     Running     0          95s
+prometheus-5b77b7d695-zw9l9               1/1     Running     0          96s
+servicegraph-57c58d6d6d-x9v5x             1/1     Running     0          96s
+```
+
+- 샘플 BookInfo 애플리케이션 및 대시보드를 외부, 특히 Katacoda에서 사용할 수 있도록 katacoda.yaml을 배포한다.
+
+```bash
+$ kubectl apply -f /root/katacoda.yaml
+service/katacoda-servicegraph created
+service/katacoda-grafana created
+service/katacoda-jaeger-query created
+service/katacoda-prometheus created
+service/istio-ingressgateway configured
+```
+
+- Sample Applicationd을 deploy한다.
+
+```bash
+$ kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
+service/details created
+deployment.extensions/details-v1 created
+service/ratings created
+deployment.extensions/ratings-v1 created
+service/reviews created
+deployment.extensions/reviews-v1 created
+deployment.extensions/reviews-v2 created
+deployment.extensions/reviews-v3 created
+service/productpage created
+deployment.extensions/productpage-v1 created
+```
+
+- gateway를 deploy한다.
+
+```bash
+$ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+gateway.networking.istio.io/bookinfo-gateway created
+virtualservice.networking.istio.io/bookinfo created
+```
+
+- Pods가 시작될 때, container가 생성되며 시작 단계가 발생한다. 이는 istio service mesh 내의 응용 프로그램에 대한 트래픽 관리 및 인증을 처리하기 위한 Envoy sidecar를 구성하는 것이다. 
+
+```bash
+$ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+details-v1-779c7845c5-6czcm       2/2     Running   0          2m
+productpage-v1-64f9bf7767-qmgdk   2/2     Running   0          119s
+ratings-v1-596455959-zzgtp        2/2     Running   0          2m
+reviews-v1-6bdb55dbdf-hn8gc       2/2     Running   0          119s
+reviews-v2-746cc79789-wws69       2/2     Running   0          119s
+reviews-v3-58fcf899fc-tw67r       2/2     Running   0          119s
+```
+
+- 기본 대상 규칙 적용 : Istio를 사용하여 Bookinfo 버전 라우팅을 제어하기 전에 대상 규칙에서 하위 집합이라고 하는 사용 가능한 버전을 정의해야 한다.
+
+```bash
+$ kubectl apply -f samples/bookinfo/networking/destination-rule-all-mtls.yaml
+destinationrule.networking.istio.io/productpage created
+destinationrule.networking.istio.io/reviews created
+destinationrule.networking.istio.io/ratings created
+destinationrule.networking.istio.io/details created
+```
+
+- Bookinfo Architecture [![Sources](https://img.shields.io/badge/출처-istio-yellow)](https://github.com/istio/istio/tree/release-0.1/samples/apps/bookinfo/src)
+  + productpage microservice는 홈페이지로, 세부 정보를 사용하여 채워지고 마이크로 서비스를 검토한다.
+  + details microservice에는 책 정보가 들어 있다.
+  + reviews microservice에는 서평이 포함되어 있다. 그것은 별 등급에 대한 등급 마이크로 서비스를 사용한다.
+  + atings microservice에는 서평에 대한 서적 등급이 포함되어 있다.
+
+---
+
+#### Control Routing
+
+- Istio의 주요 특징 중 하나는 traffic management다. Microservice architectures의 확장에 따라, 보다 진보된 service-to-service 통신 제어에 대한 요구사항이 있다.
+- 트래픽 관리의 한 가지 측면은 사용자 에이전트 문자열, IP 주소 또는 쿠키와 같은 HTTP 요청을 기반으로 트래픽 라우팅을 제어하는 것이다.
+
+```bash
+$ cat samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+```
+-  routing rules은 istioctl을 사용하여 적용할 수 있다.
+
+```bash
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+virtualservice.networking.istio.io/reviews created
+```
+
+- Productpage 접속 (jason/jason)
+
+#### Traffic Shaping for Canary Releases
+
+- 테스트를 위해 트래픽을 분할하고 변경사항을 롤아웃하는 능력은 중요하며 이를 통해, A/B 변동 테스트 또는 카나리아 릴리즈 배포가 가능하다.
+
+```bash
+$ cat samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 50
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 50
+
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml
+virtualservice.networking.istio.io/reviews configured
+```
+
+#### New Releases
+
+- 위의 접근 방식을 고려할 때 canary release가 성공적이라면 traffic의 100%를 review로 이동시킨다.
+
+```bash
+$ cat samples/bookinfo/networking/virtual-service-reviews-v3.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
+virtualservice.networking.istio.io/reviews configured
+
+$ istioctl get virtualservices
+VIRTUAL-SERVICE NAME   GATEWAYS           HOSTS     #HTTP     #TCP      NAMESPACE   AGE
+bookinfo               bookinfo-gateway   *             1        0      default     17m
+reviews                                   reviews       1        0      default     6m
+```
+
+#### Access Metrics
+
+- Grafana를 통해 모니터링하려면 트래픽이 있어야 한다. 응용 프로그램에 요청을 보내기 위해 아래 명령을 실행한다.
+
+```bash
+$ while true; do
+>   curl -s https://2886795281-80-elsy06.environments.katacoda.com/productpage > /dev/null
+>   echo -n .;
+>   sleep 0.2
+> done
+```
+
+![istio_grafana](images/istio_graph.png)
+
 
 ### Release Download [![Sources](https://img.shields.io/badge/출처-IstioRelease-yellow)](https://github.com/istio/istio/releases/tag/1.4.4)
 
@@ -706,6 +952,8 @@ $ curl -L https://istio.io/downloadIstio | sh -
 $ cd istio-1.4.4
 $ export PATH=$PWD/bin:$PATH
 ```
+
+---
 
 ## Service Tools
 
